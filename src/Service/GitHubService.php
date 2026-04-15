@@ -4,14 +4,11 @@ namespace App\Service;
 
 use App\Enum\HealthStatus;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\HttpClient\HttpClient;
 
 class GitHubService
 {
-    public function __construct(private HttpClientInterface $httpClient, private LoggerInterface $logger
-        )
+    public function __construct(private HttpClientInterface $httpClient, private LoggerInterface $logger)
     {
     }
 
@@ -53,13 +50,14 @@ class GitHubService
             }
             // Remove the "Status:" and whitespace from the label
             $status = trim(substr($label, strlen('Status:')));
+
+            // Creamos una excepción sy TryForm devuelve null
+            $health = HealthStatus::tryFrom($status);
+            if(null === $health)
+            {
+                throw new \RuntimeException(sprintf('%s is an unkonown status label!', $label));// este mensaje se muestra con --testdox
+            }
         }
-        // Creamos una excepción sy TryForm devuelve null
-        $health = HealthStatus::tryFrom($status);
-        if(null === $health)
-        {
-            throw new RuntimeException(sprintf('%s is an unkonown status label'));
-        }
-        return $health;
+        return $health ?? HealthStatus::HEALTHY;
     }
 }
