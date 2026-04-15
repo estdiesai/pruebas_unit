@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Enum\HealthStatus;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpClient\HttpClient;
 
@@ -42,6 +43,8 @@ class GitHubService
     private function getDinoStatusFromLabels(array $labels): HealthStatus
     {
         $status = null;
+        // si una etiqueta tiene el prefijo "Estado:",
+        // lo cortamos, ponemos lo que queda en $status, y lo pasamos a tryFrom() para poder devolver un HealthStatus
         foreach ($labels as $label) {
             $label = $label['name'];
             // We only care about "Status" labels
@@ -51,6 +54,12 @@ class GitHubService
             // Remove the "Status:" and whitespace from the label
             $status = trim(substr($label, strlen('Status:')));
         }
-        return HealthStatus::tryFrom($status);
+        // Creamos una excepción sy TryForm devuelve null
+        $health = HealthStatus::tryFrom($status);
+        if(null === $health)
+        {
+            throw new RuntimeException(sprintf('%s is an unkonown status label'));
+        }
+        return $health;
     }
 }
