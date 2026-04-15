@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\HealthStatus;
 use App\Repository\DinosaurRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,6 +26,9 @@ class Dinosaur
     #[ORM\Column(length: 255)]
     private ?string $enclosure = null;
 
+    #[ORM\Column]
+    private HealthStatus $health = HealthStatus::HEALTHY;
+
 
     public function __construct(string $name, string $genus = 'Unknown', int $length = 0, string $enclosure = 'Unknown')
     {
@@ -33,7 +37,6 @@ class Dinosaur
         $this->length = $length;
         $this->enclosure = $enclosure;
     }
-
 
     public function getId(): ?int
     {
@@ -99,5 +102,14 @@ class Dinosaur
         }
 
         return 'Small';
+    }
+
+    public function isAcceptingVisitors(): bool
+    {
+        return $this->health !== HealthStatus::SICK;
+    }
+    public function setHealth(HealthStatus $health): void
+    {
+        $this->health = $health;
     }
 }
