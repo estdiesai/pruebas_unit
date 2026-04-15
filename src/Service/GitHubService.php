@@ -39,7 +39,7 @@ class GitHubService
 
     private function getDinoStatusFromLabels(array $labels): HealthStatus
     {
-        $status = null;
+        $health = null;
         // si una etiqueta tiene el prefijo "Estado:",
         // lo cortamos, ponemos lo que queda en $status, y lo pasamos a tryFrom() para poder devolver un HealthStatus
         foreach ($labels as $label) {
@@ -55,7 +55,7 @@ class GitHubService
             $health = HealthStatus::tryFrom($status);
             if(null === $health)
             {
-                throw new \RuntimeException(sprintf('%s is an unkonown status label!', $label));// este mensaje se muestra con --testdox
+                throw new \RuntimeException(sprintf('%s is an unknown status label!', $label));// este mensaje se muestra con --testdox
             }
         }
         return $health ?? HealthStatus::HEALTHY;
